@@ -47,4 +47,4 @@ function sendMessage() {
 #
 # Credits
  
-**Made by [Arjen Adin Aldanmaz](https://github.com/makesikann) And [ibidi](https://github.com/ibidi)**
+**Made by [Meksikan](https://github.com/makesikann) And [ibidi](https://github.com/ibidi)**
