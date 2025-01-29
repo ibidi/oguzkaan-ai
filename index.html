@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Oguzkaan Ai - ChatGPT Benzeri AI Asistan</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h3><a href="https://chat.ibidi.tr/" style="text-decoration:none;color:white;">Oğuzkaan Ai</a></h3>
+            <img src="./images/oguzkaan-logo.png" alt="Oğuzkaan AI Logo" class="oguzkaan-logo">
+        </div>
+
+        <div class="info">
+            <a href="https://github.com/ibidi/oguzkaan-ai" target="_blank">
+                <i class="fab fa-github"></i> GitHub'da İncele
+            </a>
+        </div>
+
+        <div class="shortcuts" id="shortcuts">
+            <div class="shortcut-1 shortcut">
+                <center>
+                    <h3><a onclick="doShortcut(1);" id="sc1title"></a></h3>
+                </center>
+                <p id="sc1p"></p>
+            </div>
+            <div class="shortcut-2 shortcut">
+                <center>
+                    <h3><a onclick="doShortcut(2);" id="sc2title"></a></h3>
+                </center>
+                <p id="sc2p"></p>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div id="chat-log"></div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Oğuzkaan Ai uygulamasına ileti gönderin.">
+            <button id="send-button">
+                <i class="fa-solid fa-paper-plane" id="button-icon"></i>
+            </button>
+            <button id="read-button" onclick="readToggle()" class="readDeactive">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <button id="image-button" onclick="sendImage()" class="">
+                <i class="fa fa-camera" id="img-button-icon"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const sc1title = document.getElementById("sc1title");
+        const sc1p = document.getElementById("sc1p");
+        const sc2title = document.getElementById("sc2title")
+        const sc2p = document.getElementById("sc2p")
+        const chatLog = document.getElementById("chat-log");
+        const userInput = document.getElementById("user-input");
+        const sendButton = document.getElementById("send-button");
+        const buttonIcon = document.getElementById("button-icon");
+        const imageButtonIcon = document.getElementById("img-button-icon")
+        const imageButton = document.getElementById("image-button");
+        const readButton = document.getElementById("read-button");
+        const info = document.querySelector(".info");
+        const shortcuts = document.getElementById("shortcuts");
+        const words = ["seni kim oluşturdu"];
+        const shortcutsWords = [
+        {
+            title: "Gıda İsrafını Önlemek İçin Ambalajlama ve Depolama",
+            p: "Gıda israfını azaltmak için tarımsal ürünlerin ambalajlanmasında ve depolanmasında hangi yenilikçi teknolojiler kullanılabilir?",
+            question: "Gelecekte yaşanması öngörülen gıda krizine çözüm üretme teması kapsamında, gıda israfını azaltmak amacıyla tarımsal ürünlerin ambalajlanması ve depolanmasında kullanılabilecek yenilikçi teknolojiler hakkında bilgi verin. Bu teknolojilerin gıda israfını nasıl azaltabileceğini ve uzun vadede gıda krizine nasıl çözüm sunabileceğini açıklayın."
+        },
+        {
+            title: "Tarımsal Üretimi Artırmak İçin Sulama Sistemleri",
+            p: "Tarımsal üretimi artırmak ve su kaynaklarını verimli kullanmak için hangi modern sulama sistemleri tercih edilmelidir?",
+            question: "Gelecekte yaşanması öngörülen gıda krizine çözüm üretme teması kapsamında, tarımsal üretimi artırmak ve su kaynaklarını verimli kullanmak için hangi modern sulama sistemlerinin tercih edilmesi gerektiğini açıklayın. Bu sulama sistemlerinin tarımsal verimliliği nasıl artırdığını ve su kaynaklarının sürdürülebilir kullanımına nasıl katkı sağladığını belirtin."
+        },
+        {
+            title: "Gıda krizini önlemek için tüketim alışkanlıklarını değiştirmenin rolü",
+            p: "Tüketim alışkanlıklarının değiştirilmesi, sürdürülebilir tarım uygulamalarının benimsenmesini sağlayarak gıda krizlerinin etkilerini azaltabilir.",
+            question: "Gelecekte yaşanması öngörülen gıda krizine çözüm üretme teması kapsamında, tüketim alışkanlıklarının değiştirilmesinin ve sürdürülebilir tarım uygulamalarının benimsenmesinin gıda krizlerinin etkilerini nasıl azaltabileceğini açıklayın."
+        },
+        {
+            title: "Sürdürülebilir çözümler nasıl sağlanabilir?",
+            p: "Gıda güvenliği ve güvencesi neden önemlidir ve bu konudaki en büyük zorluklar nelerdir?",
+            question: "Gıda güvenliği ve güvencesi neden önemlidir ve bu konudaki en büyük zorluklar nelerdir? Sürdürülebilir çözümler nasıl sağlanabilir? Bu konular hakkında detaylı bilgi ve analiz sunar mısınız?"
+        },
+        {
+            title: "Gıda Güvenliği ve Güvencesi: Küresel Sağlık ve Sürdürülebilirlik İçin Stratejiler",
+            p: "Gıda güvenliği ve güvencesi neden kritik öneme sahiptir ve bu konulardaki ana zorluklar nelerdir? Bu zorlukların üstesinden gelmek için hangi sürdürülebilir çözümler önerilebilir?",
+            question: "Gıda güvenliği ve güvencesi neden kritik öneme sahiptir ve bu konulardaki ana zorluklar nelerdir? Bu zorlukların üstesinden gelmek için hangi sürdürülebilir çözümler önerilebilir? Bu konular hakkında detaylı bilgi ve analiz sunar mısınız?"
+        },
+        {
+            title: "Teknoloji Değişimi ve Verimlilik Artışının Desteklenmesi: Ekonomik ve Sosyal Kazanımlar",
+            p: "Teknoloji değişimi ve verimlilik artışının desteklenmesi neden önemlidir? Bu süreçte karşılaşılan ana zorluklar nelerdir ve bu zorlukları aşmak için hangi stratejiler uygulanabilir?",
+            question: "Teknoloji değişimi ve verimlilik artışının desteklenmesi neden önemlidir? Bu süreçte karşılaşılan ana zorluklar nelerdir ve bu zorlukları aşmak için hangi stratejiler uygulanabilir? Bu konular hakkında detaylı bilgi ve analiz sunar mısınız?"
+        }];
+        var readOpen = false;
+        var buttonDisabled = false;
+        var shortcutLength = shortcutsWords.length;
+        var randomNumber1 = Math.floor(Math.random() * shortcutLength);
+        var randomNumber2;
+        do {
+            randomNumber2 = Math.floor(Math.random() * shortcutLength);
+        } while (randomNumber2 === randomNumber1);
+        sc1title.innerHTML = shortcutsWords[randomNumber1].title
+        sc1p.innerHTML = shortcutsWords[randomNumber1].p
+        sc2title.innerHTML = shortcutsWords[randomNumber2].title
+        sc2p.innerHTML = shortcutsWords[randomNumber2].p
+
+        function doShortcut(no) {
+            if (no == 1) {
+                sendMessage(shortcutsWords[randomNumber1].question);
+            } else if (no == 2) {
+                sendMessage(shortcutsWords[randomNumber2].question);
+            }
+        }
+
+        function readToggle() {
+            readOpen = !readOpen;
+            readButton.classList.toggle('readDeactive');
+        }
+        
+        function sendImage() {
+            imageButton.disabled = true;
+            buttonDisabled = true;
+            let message = userInput.value.trim();
+            
+            if (message !== "") {
+                imageButtonIcon.classList.remove("fa-solid", "fa-paper-plane");
+                imageButtonIcon.classList.add("fas", "fa-spinner", "fa-pulse");
+                
+                fetch("https://chat.ibidi.tr/api/image.php?prompt=" + encodeURIComponent(message))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.reply) {
+                            setTimeout(() => {
+                                appendMessage("bot", decodeURIComponent(data.reply));
+                                resetButtonState();
+                            }, 1000);
+                        } else {
+                            resetButtonState();
+                        }
+                    })
+                    .catch(error => {
+                        appendMessage("bot", "Hata: API Key kontrol edilmedi!");
+                        resetButtonState();
+                    });
+            } else {
+                resetButtonState();
+            }
+        }
+
+        function resetButtonState() {
+            imageButtonIcon.classList.add("fa-solid", "fa-paper-plane");
+            imageButtonIcon.classList.remove("fas", "fa-spinner", "fa-pulse");
+            imageButton.disabled = false;
+            buttonDisabled = false;
+        }
+
+        function sendMessage(optionalMessage) {
+            sendButton.disabled = true;
+            buttonDisabled = true;
+            let message = optionalMessage || userInput.value.trim();
+            if (message !== "") {
+                appendMessage("user", message);
+                userInput.value = "";
+                let eslesme = false;
+                for (let i = 0; i < words.length; i++) {
+                    if (words[i].toLowerCase() === message.toLowerCase()) {
+                        eslesme = true;
+                        appendMessage("bot", "Ben Oğuzkaan Ai, Arjen Adin Aldanmaz ve İhsan Baki Doğan tarafından oluşturuldum.");
+                        buttonIcon.classList.add("fa-solid", "fa-paper-plane");
+                        buttonIcon.classList.remove("fas", "fa-spinner", "fa-pulse");
+                        sendButton.disabled = false;
+                        buttonDisabled = false;
+                        break;
+                    }
+                }
+                if (!eslesme) {
+                    fetch("https://chat.ibidi.tr/api/chat.php?question=" + encodeURIComponent(message))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.reply) {
+                                setTimeout(() => {
+                                    appendMessage("bot", decodeURIComponent(data.reply));
+                                    buttonIcon.classList.add("fa-solid", "fa-paper-plane");
+                                    buttonIcon.classList.remove("fas", "fa-spinner", "fa-pulse");
+                                    sendButton.disabled = false;
+                                    buttonDisabled = false;
+                                }, 1000);
+                            } else {
+                                buttonIcon.classList.add("fa-solid", "fa-paper-plane");
+                                buttonIcon.classList.remove("fas", "fa-spinner", "fa-pulse");
+                                sendButton.disabled = false;
+                                buttonDisabled = false;
+                            }
+                        })
+                        .catch(error => {
+                            appendMessage("bot", "Hata: API Key kontrol edilmedi!");
+                            buttonIcon.classList.add("fa-solid", "fa-paper-plane");
+                            buttonIcon.classList.remove("fas", "fa-spinner", "fa-pulse");
+                            sendButton.disabled = false;
+                            buttonDisabled = false;
+                        });
+                }
+            } else {
+                sendButton.disabled = false;
+                buttonDisabled = false;
+            }
+        }
+
+        function readText(text) {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+
+        function appendMessage(sender, message) {
+            info.style.display = "none";
+            shortcuts.style.display = "none";
+            buttonIcon.classList.remove("fa-solid", "fa-paper-plane");
+            buttonIcon.classList.add("fas", "fa-spinner", "fa-pulse");
+
+            let messageElement = document.createElement("div");
+            let iconElement = document.createElement("div");
+            let chatBoxElement = document.createElement("div");
+            let icon = document.createElement("i");
+
+            chatBoxElement.classList.add("chat-box");
+            iconElement.classList.add("icon");
+            messageElement.classList.add(sender);
+            messageElement.innerText = message;
+
+            if (sender === "user") {
+                icon.classList.add("fa-regular", "fa-user");
+                iconElement.setAttribute("id", "user-icon");
+            } else {
+                icon.classList.add("fa-solid", "fa-robot");
+                iconElement.setAttribute("id", "bot-icon");
+                if (readOpen) {
+                    readText(message);
+                }
+            }
+
+            iconElement.appendChild(icon);
+            chatBoxElement.appendChild(iconElement);
+            chatBoxElement.appendChild(messageElement);
+            chatLog.appendChild(chatBoxElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        sendButton.addEventListener("click", () => sendMessage());
+        userInput.addEventListener("keydown", event => {
+            if (event.key === "Enter" && !buttonDisabled) {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+
+</html>
